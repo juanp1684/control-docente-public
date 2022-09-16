@@ -9,20 +9,21 @@ class DataRequests:
 
 	def requestGet(self, sisCode):
 		response = requests.get(self.URL_API_REST + "?codsis=" + sisCode)
-		print(response.json())
+		# print(response.json())
+		return json.loads(response.content)
 
 	def requestsPost(self, report):
 		request = requests.post(self.URL_API_REST + "/report/", data=report)
 		response = json.loads(request.content)
-		print(response['message'])
+		#print(response['message'])
 
 	def createReport(self, result):
 		dataResult = result.split(';')
 		jsonData = '{"codsis": "' + dataResult[0] + '", "schedule_id": ' + dataResult[1] + ', "attempts": ' + dataResult[2] + ', "report_type": "' + dataResult[3] + '"}'
 		return jsonData
 
-dataRequests = DataRequests()
-dataRequests.requestGet("201800124")
+# dataRequests = DataRequests()
+# dataRequests.requestGet("201800124")
 #dataRequests.requestGet("2222")
 #data = "1111;5;3;fallido"
 #dataRequests.requestsPost(dataRequests.createReport(data))

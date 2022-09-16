@@ -1,7 +1,30 @@
 from datarequests import DataRequests
+from launchcaptcha import LaunchCaptcha
 from uicaptcha import UICaptcha
 from uilogin import UILogin
+from datetime import datetime, timedelta, time
+import time as thread_time
 import random
+
+RESPONSE_TIME_FORMAT = "%H:%M:%S"
+
+def parse_schedule_time (schedule_time):
+	return datetime.strptime(schedule_time, RESPONSE_TIME_FORMAT)
+
+def set_schedules_for_today(all_schedules):
+	today_day = datetime.today().weekday()
+	today_schedules = list(filter(lambda schedule: schedule['day_of_week'] == today_day, all_schedules))
+	today_schedules = [{'start': parse_schedule_time(schedule['start_time']),
+			'end': parse_schedule_time(schedule['end_time']),
+			'id': schedule['id']} for schedule in today_schedules]
+	today_schedules = list(filter(lambda schedule: schedule['start'].time() > datetime.now().time(), today_schedules))
+
+	for schedule in today_schedules:
+		wait = (schedule['start'] - datetime.now()).seconds
+		duration = (schedule['end'] - schedule['start']).seconds
+		class_control = LaunchCaptcha(wait, duration, codsis, schedule['id'])
+		class_control.start()
+	print("schedules set for the day")
 
 if __name__ == "__main__":
 	'''
@@ -20,12 +43,20 @@ if __name__ == "__main__":
 		uiCaptcha.mainloop()
 	'''
 
-	codeSis = "2222"
-	schudleId = 2
-	
-	guiCaptcha = UICaptcha()
+	codsis = input("codsis please ")
+	request_manager = DataRequests()
+	all_schedules = request_manager.requestGet(sisCode=codsis)['schedules']
+	while True:
+		set_schedules_for_today(all_schedules)
+		tomorrow = datetime.now() + timedelta(days=1)
+		difference = (datetime.combine(tomorrow, time.min) - datetime.now()).seconds + 60 #just in case addition
+		# print(difference)
+		thread_time.sleep(difference)
+		
+
+	""" guiCaptcha = UICaptcha()
 	guiCaptcha.mainloop()
 	data = codeSis + ";" + str(schudleId) + ";" + guiCaptcha.getResult()
 	print(data)
 	dataRequests = DataRequests()
-	dataRequests.requestsPost(dataRequests.createReport(data))
+	dataRequests.requestsPost(dataRequests.createReport(data)) """

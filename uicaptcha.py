@@ -55,22 +55,22 @@ class UICaptcha(tk.Tk):
 		return str(captcha.getText())
 
 	def verifyCaptcha(self):
-		print("Texto captha {}" . format(self.valueTextCaptcha))
+		# print("Texto captha {}" . format(self.valueTextCaptcha))
 
 		self.numberAttemps += 1
-		print("Intento número: {}" . format(self.numberAttemps))
+		# print("Intento número: {}" . format(self.numberAttemps))
 
 		if self.numberAttemps <= self.NUMBER_ATTEMPS:
 			if self.valueTextCaptcha == self.textCaptcha.get():
 				self.status = "completado"
 				self.message.set("Texto correcto {}" . format(self.textCaptcha.get()))
-				print("SON IGUALES")
+				# print("SON IGUALES")
 				self.destroy()
 				return None
 			
 			self.status = "fallido"
 			self.message.set("Texto incorrecto {}" . format(self.textCaptcha.get()))
-			print("SON DIFERENTES")
+			# print("SON DIFERENTES")
 
 			if self.numberAttemps == self.NUMBER_ATTEMPS:
 				self.destroy()
