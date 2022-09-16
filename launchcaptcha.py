@@ -1,8 +1,7 @@
-from datetime import timedelta, datetime
 import time
 import winsound 
 import random
-from threading import *
+from threading import Thread
 from uicaptcha import UICaptcha
 from datarequests import DataRequests
 
