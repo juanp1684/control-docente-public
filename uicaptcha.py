@@ -1,5 +1,5 @@
 from turtle import width
-from captchamanagement import Captcha
+from captchamanagement import Captcha, CAPTCHA_PATH
 from tkinter import *
 from PIL import Image, ImageTk
 
@@ -21,6 +21,7 @@ class UICaptcha(tk.Tk):
 		self.iconbitmap("umss.ico")
 		self.resizable(0, 0)
 		self.eval('tk::PlaceWindow . center')
+		self.wm_attributes("-topmost", True)
 
 		self.valueTextCaptcha = self.generateCaptcha()
 		self.numberAttemps = 0
@@ -34,7 +35,7 @@ class UICaptcha(tk.Tk):
 
 		self.canvas = Canvas(self, width=300, height=80)
 		self.canvas.pack()
-		self.imageCaptcha = PhotoImage(file="captcha.png")
+		self.imageCaptcha = PhotoImage(file=CAPTCHA_PATH)
 		self.canvas.create_image(self.WINDOW_WIDTH/2, 40, anchor=CENTER, image=self.imageCaptcha)
 
 		inputCaptcha = Entry(self, textvariable=self.textCaptcha, font="Helvetica 20", justify=CENTER)
