@@ -7,11 +7,12 @@ from datarequests import DataRequests
 
 class LaunchCaptcha:
 
-	def __init__(self, wait_time, class_duration,codsis, schedule_id):
+	def __init__(self, wait_time, class_duration,codsis, schedule_id, cookie):
 		self.wait_time = wait_time
 		self.class_duration = class_duration
 		self.codsis = codsis
 		self.schedule_id = schedule_id
+		self.cookie = cookie
 
 	def start(self):
 		random_threshold = self.class_duration // 3
@@ -40,4 +41,4 @@ class LaunchCaptcha:
 		data = codsis + ";" + str(schedule_id) + ";" + uiCaptcha.getResult()
 		# print(data)
 		dataRequests = DataRequests()
-		dataRequests.requestsPost(dataRequests.createReport(data))
+		dataRequests.requestsPost(dataRequests.createReport(data), self.cookie)
