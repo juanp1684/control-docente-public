@@ -1,4 +1,4 @@
-from tkinter import *
+from tkinter import Tk, StringVar, Label, Entry, messagebox, Button, CENTER
 import os
 from tkinter import messagebox
 from datarequests import DataRequests
