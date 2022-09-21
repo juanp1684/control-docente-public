@@ -68,7 +68,7 @@ class UILogin(Tk):
 			if login_attempt.status_code == 200:
 				self.logged_codsis = self.sisCode.get()
 				self.register_cookie(login_attempt)
-				messagebox.showerror(ALERT_TITLE, SUCCES_MESSAGE)
+				messagebox.showinfo(ALERT_TITLE, SUCCES_MESSAGE)
 				self.destroy()
 			else:
 				self.message.set("Código SIS y/o contraseña incorrectos")
