@@ -1,10 +1,13 @@
 from tkinter import *
 import os
+from tkinter import messagebox
 from datarequests import DataRequests
 
 USER_PATH = os.path.expanduser('~')
 APP_FOLDER_PATH	= USER_PATH + '/.control docente/'
 SESSION_FILE_PATH = APP_FOLDER_PATH + 'session'
+ALERT_TITLE = "Control docente"
+SUCCES_MESSAGE = "Inicio de sesion exitoso"
 
 class UILogin(Tk):
 	logged_codsis = None
@@ -65,6 +68,7 @@ class UILogin(Tk):
 			if login_attempt.status_code == 200:
 				self.logged_codsis = self.sisCode.get()
 				self.register_cookie(login_attempt)
+				messagebox.showerror(ALERT_TITLE, SUCCES_MESSAGE)
 				self.destroy()
 			else:
 				self.message.set("Código SIS y/o contraseña incorrectos")
