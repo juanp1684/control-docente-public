@@ -1,7 +1,7 @@
 from tkinter import messagebox
 from turtle import width
 from captchamanagement import Captcha, CAPTCHA_PATH
-from tkinter import *
+from tkinter import Tk, StringVar, Canvas, PhotoImage, CENTER, Entry, Label, Button
 
 ALERT_TITLE = 'Control'
 SUCCES_MESSAGE = "Confirmado"
