@@ -18,8 +18,7 @@ class LaunchCaptcha:
 		random_threshold = self.class_duration // 3
 		first_wait_time = self.wait_time + random.randint(1, random_threshold)
 		second_wait_time = self.wait_time + self.class_duration - random.randint(1, random_threshold)
-		# print(first_wait_time)
-		# print(second_wait_time)
+
 		first_control = Thread(target=lambda: self.alarm(first_wait_time))
 		second_control = Thread(target=lambda: self.alarm(second_wait_time))
 		first_control.start()
@@ -30,7 +29,6 @@ class LaunchCaptcha:
 
 		time.sleep(time_until_control) 
 
-		# print("Lanza el captcha")
 		winsound.PlaySound("sound.wav", winsound.SND_ASYNC)
 		
 		codsis = self.codsis
@@ -39,6 +37,6 @@ class LaunchCaptcha:
 		uiCaptcha = UICaptcha()
 		uiCaptcha.mainloop()
 		data = codsis + ";" + str(schedule_id) + ";" + uiCaptcha.getResult()
-		# print(data)
+
 		dataRequests = DataRequests()
 		dataRequests.requestsPost(dataRequests.createReport(data), self.cookie)
