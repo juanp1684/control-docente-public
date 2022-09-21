@@ -16,10 +16,8 @@ class Captcha:
 	def generate(self):
 		image = ImageCaptcha(width = 250, height = 80, fonts=['C:/Windows/Fonts/Arial.ttf'])
 
-		for _ in range(5):
-			digit = random.randint(0, 9)
-			self.captchaText += str(digit)
-		
+		self.captchaText = "".join(random.choice(string.digits) for _ in range(CAPTCHA_LENGHT))
+
 		if not os.path.isdir(APP_FOLDER_PATH):
 			os.makedirs(APP_FOLDER_PATH)
 
