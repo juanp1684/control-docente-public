@@ -1,5 +1,4 @@
 from tkinter import *
-import tkinter as tk
 import os
 from datarequests import DataRequests
 
@@ -7,7 +6,7 @@ USER_PATH = os.path.expanduser('~')
 APP_FOLDER_PATH	= USER_PATH + '/.control docente/'
 SESSION_FILE_PATH = APP_FOLDER_PATH + 'session'
 
-class UILogin(tk.Tk):
+class UILogin(Tk):
 	logged_codsis = None
 	logged_cookie = None
 	
@@ -51,11 +50,11 @@ class UILogin(tk.Tk):
 		buttonLogin.pack()
 
 	def register_cookie(self, response):
-		file = open(SESSION_FILE_PATH, 'w+')
+		session_file = open(SESSION_FILE_PATH, 'w+')
 		self.logged_cookie = response.cookies
 		cookie = self.logged_cookie.get('jwt')
-		file.write(f'{self.logged_codsis}\n{cookie}')
-		file.close()
+		session_file.write(f'{self.logged_codsis}\n{cookie}')
+		session_file.close()
 
 	def verifyValues(self):
 		if self.sisCode.get() == "" or self.password.get() == "":
@@ -69,6 +68,3 @@ class UILogin(tk.Tk):
 				self.destroy()
 			else:
 				self.message.set("Código SIS y/o contraseña incorrectos")
-
-#guiUILogin = UILogin()
-#guiUILogin.mainloop()
