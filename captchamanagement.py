@@ -1,10 +1,12 @@
 from captcha.image import ImageCaptcha
 import os
 import random
+import string
 
 USER_PATH = os.path.expanduser('~')
 APP_FOLDER_PATH	= USER_PATH + '/.control docente/'
 CAPTCHA_PATH = APP_FOLDER_PATH + "captcha.png"
+CAPTCHA_LENGHT = 5
 
 class Captcha:
 
@@ -14,14 +16,13 @@ class Captcha:
 	def generate(self):
 		image = ImageCaptcha(width = 250, height = 80, fonts=['C:/Windows/Fonts/Arial.ttf'])
 
-		for number in range(5):
+		for _ in range(5):
 			digit = random.randint(0, 9)
 			self.captchaText += str(digit)
 		
 		if not os.path.isdir(APP_FOLDER_PATH):
 			os.makedirs(APP_FOLDER_PATH)
 
-		data = image.generate(self.captchaText)
 		image.write(self.captchaText, CAPTCHA_PATH)
 
 	def getText(self):
