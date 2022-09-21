@@ -1,7 +1,5 @@
-from email import message
 from tkinter import messagebox
 from turtle import width
-from winsound import MessageBeep
 from captchamanagement import Captcha, CAPTCHA_PATH
 from tkinter import *
 
@@ -61,11 +59,7 @@ class UICaptcha(Tk):
 		return str(captcha.getText())
 
 	def verifyCaptcha(self):
-		# print("Texto captha {}" . format(self.valueTextCaptcha))
-
 		self.numberAttemps += 1
-		# print("Intento número: {}" . format(self.numberAttemps))
-
 		if self.numberAttemps <= self.NUMBER_ATTEMPS:
 			if self.valueTextCaptcha == self.textCaptcha.get():
 				self.status = "completado"
@@ -76,7 +70,6 @@ class UICaptcha(Tk):
 			
 			self.status = "fallido"
 			self.message.set("Texto incorrecto {}" . format(self.textCaptcha.get()))
-			# print("SON DIFERENTES")
 
 			if self.numberAttemps == self.NUMBER_ATTEMPS:
 				messagebox.showinfo(ALERT_TITLE, FAILED_MESSAGE)
@@ -85,9 +78,3 @@ class UICaptcha(Tk):
 	
 	def getResult(self):
 		return str(self.numberAttemps) + ";" + self.status
-
-'''
-guiCaptcha = UICaptcha()
-guiCaptcha.mainloop()
-print("\nRESULTADO: {}" . format(guiCaptcha.getResult()))
-'''
