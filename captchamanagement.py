@@ -14,7 +14,7 @@ class Captcha:
 		self.captchaText = ""
 	
 	def generate(self):
-		image = ImageCaptcha(width = 250, height = 80, fonts=['C:/Windows/Fonts/Arial.ttf'])
+		image = ImageCaptcha(width = 250, height = 80, fonts=['arial.ttf'])
 
 		self.captchaText = "".join(random.choice(string.digits) for _ in range(CAPTCHA_LENGHT))
 
