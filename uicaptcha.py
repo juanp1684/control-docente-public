@@ -1,11 +1,15 @@
+from email import message
+from tkinter import messagebox
 from turtle import width
+from winsound import MessageBeep
 from captchamanagement import Captcha, CAPTCHA_PATH
 from tkinter import *
-from PIL import Image, ImageTk
 
-import tkinter as tk
+ALERT_TITLE = 'Control'
+SUCCES_MESSAGE = "Confirmado"
+FAILED_MESSAGE = "Se excedio el maximo de intentos"
 
-class UICaptcha(tk.Tk):
+class UICaptcha(Tk):
 
 	def __init__(self):
 
@@ -22,6 +26,7 @@ class UICaptcha(tk.Tk):
 		self.resizable(0, 0)
 		self.eval('tk::PlaceWindow . center')
 		self.wm_attributes("-topmost", True)
+		self.protocol("WM_DELETE_WINDOW", lambda: None)
 
 		self.valueTextCaptcha = self.generateCaptcha()
 		self.numberAttemps = 0
@@ -48,7 +53,7 @@ class UICaptcha(tk.Tk):
 		buttonVerify = Button(self, width=19, pady=5, text="Verificar", font="Helvetica 10", command=self.verifyCaptcha)
 		buttonVerify.pack()
 
-		self.after(self.SECONDS, lambda:self.destroy())
+		self.after(self.SECONDS, self.destroy)
 
 	def generateCaptcha(self):
 		captcha = Captcha()
@@ -65,7 +70,7 @@ class UICaptcha(tk.Tk):
 			if self.valueTextCaptcha == self.textCaptcha.get():
 				self.status = "completado"
 				self.message.set("Texto correcto {}" . format(self.textCaptcha.get()))
-				# print("SON IGUALES")
+				messagebox.showinfo(ALERT_TITLE, SUCCES_MESSAGE)
 				self.destroy()
 				return None
 			
@@ -74,6 +79,7 @@ class UICaptcha(tk.Tk):
 			# print("SON DIFERENTES")
 
 			if self.numberAttemps == self.NUMBER_ATTEMPS:
+				messagebox.showinfo(ALERT_TITLE, FAILED_MESSAGE)
 				self.destroy()
 				return None
 	
