@@ -12,6 +12,57 @@ RESPONSE_LAST_CONNECTION_FORMAT = "%Y-%m-%dT%H:%M:%S.%f%z"
 USER_PATH = os.path.expanduser('~')
 APP_FOLDER_PATH	= USER_PATH + '/.control docente/'
 SESSION_FILE_PATH = APP_FOLDER_PATH + 'session'
+REPORT_DATA_FORMAT = '{};{};{};{}'
+
+def report_skipped_schedules(schedules, cookie, codsis):
+	request_manager = DataRequests()
+	for schedule in schedules:
+		request_manager.requestsPost(request_manager.createReport(REPORT_DATA_FORMAT.format(codsis, schedule['id'], 0, 'omision')), cookie)
+
+def days_in_between(last_day, today):
+	if (last_day < today):
+		return range(last_day + 1, today)
+	day = last_day + 1
+	result = []
+	while day != today:
+		result.append(day)
+		day += 1
+		if day > 6:
+			day = 0
+	return result
+
+def send_catchup_reports(last_date, cookie, schedules, codsis):
+	last_day_of_week = last_date.weekday()
+	days_difference = (datetime.now() - last_date).days
+	today_day = datetime.now().weekday()
+	print(days_difference)
+	if last_day_of_week == today_day and days_difference == 0: #both dates within the same day
+		today_schedules = list(filter(lambda schedule: schedule['day_of_week'] == today_day, schedules))
+		today_schedules = [{'start': parse_schedule_time(schedule['start_time']),
+			'end': parse_schedule_time(schedule['end_time']),
+			'id': schedule['id']} for schedule in today_schedules]
+		today_schedules = list(filter(lambda schedule: schedule['start'].time() < datetime.now().time() and 
+							schedule['start'].time() > last_date.time(), today_schedules))
+		report_skipped_schedules(today_schedules, cookie, codsis)
+	elif days_difference < 7: #less than a week difference (no repeated schedules)
+		total_missed_schedules = list(filter(lambda schedule: schedule['day_of_week'] == last_day_of_week, schedules))
+		total_missed_schedules = [{'start': parse_schedule_time(schedule['start_time']),
+			'end': parse_schedule_time(schedule['end_time']),
+			'id': schedule['id']} for schedule in total_missed_schedules]
+		total_missed_schedules = list(filter(lambda schedule: schedule['start'].time() > last_date.time(), total_missed_schedules))
+
+		today_missed_schedules = list(filter(lambda schedule: schedule['day_of_week'] == today_day, schedules))
+		today_missed_schedules = [{'start': parse_schedule_time(schedule['start_time']),
+			'end': parse_schedule_time(schedule['end_time']),
+			'id': schedule['id']} for schedule in today_missed_schedules]
+		today_missed_schedules = list(filter(lambda schedule: schedule['start'].time() < datetime.now().time(), today_missed_schedules))
+		total_missed_schedules.extend(today_missed_schedules)
+		days_to_add = days_in_between(last_day_of_week, today_day)
+		for day in days_to_add:
+			day_schedules = list(filter(lambda schedule: schedule['day_of_week'] == day, schedules))
+			total_missed_schedules.extend(day_schedules)		
+		report_skipped_schedules(total_missed_schedules, cookie, codsis)
+	#TODO differences bigger than a week (repeated schedules)
 
 def exit_application(icon, item):
 	icon.stop()
@@ -43,21 +94,6 @@ def set_schedules_for_today(all_schedules, cookie):
 	print("schedules set for the day")
 
 if __name__ == "__main__":
-	'''
-	flag = random.randint(0, 1)
-	print("Bandera es {}" . format(flag))
-	if flag == 0:
-		print("Mostrar ventana login")
-		uiLogin = UILogin()
-		uiLogin.mainloop()
-		#Code SIS: 201800124
-		data = DataRequests()
-		data.requestGet("201800124")
-	else:
-		print("Mostrar ventana captcha")
-		uiCaptcha = UICaptcha()
-		uiCaptcha.mainloop()
-	'''
 	if not os.path.isdir(APP_FOLDER_PATH):
 			os.makedirs(APP_FOLDER_PATH)
 
@@ -76,11 +112,9 @@ if __name__ == "__main__":
 	response_data = request_manager.requestGet(sisCode=codsis, cookie=cookie)
 	all_schedules = response_data['schedules']
 	last_connection = datetime.strptime( response_data['last_connection'], RESPONSE_LAST_CONNECTION_FORMAT)
-
+	
+	send_catchup_reports(last_connection.replace(tzinfo=None), cookie, all_schedules, codsis)
 	start_tray_icon()
-
-	#TODO
-	#send_catchup_reports(last_connection, cookie)
 
 	while True:
 		set_schedules_for_today(all_schedules, cookie)
@@ -88,11 +122,3 @@ if __name__ == "__main__":
 		difference = (datetime.combine(tomorrow, time.min) - datetime.now()).seconds + 60 #just in case addition
 		# print(difference)
 		thread_time.sleep(difference)
-		
-
-	""" guiCaptcha = UICaptcha()
-	guiCaptcha.mainloop()
-	data = codeSis + ";" + str(schudleId) + ";" + guiCaptcha.getResult()
-	print(data)
-	dataRequests = DataRequests()
-	dataRequests.requestsPost(dataRequests.createReport(data)) """
