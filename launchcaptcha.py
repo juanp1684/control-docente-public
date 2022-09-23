@@ -21,6 +21,8 @@ class LaunchCaptcha:
 
 		first_control = Thread(target=lambda: self.alarm(first_wait_time))
 		second_control = Thread(target=lambda: self.alarm(second_wait_time))
+		first_control.daemon = True
+		second_control.daemon = True
 		first_control.start()
 		second_control.start()
 		

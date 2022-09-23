@@ -1,16 +1,28 @@
+import pystray
+from PIL import Image
 from datarequests import DataRequests
 from launchcaptcha import LaunchCaptcha
-from uicaptcha import UICaptcha
 from uilogin import UILogin
 from datetime import datetime, timedelta, time
 import time as thread_time
 import os
-import random
 
 RESPONSE_TIME_FORMAT = "%H:%M:%S"
+RESPONSE_LAST_CONNECTION_FORMAT = "%Y-%m-%dT%H:%M:%S.%f%z"
 USER_PATH = os.path.expanduser('~')
 APP_FOLDER_PATH	= USER_PATH + '/.control docente/'
 SESSION_FILE_PATH = APP_FOLDER_PATH + 'session'
+
+def exit_application(icon, item):
+	icon.stop()
+	os._exit(0)
+
+def start_tray_icon():
+	image = Image.open('umss.ico')
+	icon = pystray.Icon('control docente', image, menu=pystray.Menu(
+		pystray.MenuItem("cerrar", exit_application)
+		))
+	icon.run_detached()
 
 def parse_schedule_time (schedule_time):
 	return datetime.strptime(schedule_time, RESPONSE_TIME_FORMAT)
@@ -61,7 +73,15 @@ if __name__ == "__main__":
 		codsis = guiUILogin.logged_codsis
 		cookie = guiUILogin.logged_cookie
 	request_manager = DataRequests()
-	all_schedules = request_manager.requestGet(sisCode=codsis, cookie=cookie)['schedules']
+	response_data = request_manager.requestGet(sisCode=codsis, cookie=cookie)
+	all_schedules = response_data['schedules']
+	last_connection = datetime.strptime( response_data['last_connection'], RESPONSE_LAST_CONNECTION_FORMAT)
+
+	start_tray_icon()
+
+	#TODO
+	#send_catchup_reports(last_connection, cookie)
+
 	while True:
 		set_schedules_for_today(all_schedules, cookie)
 		tomorrow = datetime.now() + timedelta(days=1)
