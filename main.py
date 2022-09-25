@@ -19,50 +19,43 @@ def report_skipped_schedules(schedules, cookie, codsis):
 	for schedule in schedules:
 		request_manager.requestsPost(request_manager.createReport(REPORT_DATA_FORMAT.format(codsis, schedule['id'], 0, 'omision')), cookie)
 
-def days_in_between(last_day, today):
-	if (last_day < today):
-		return range(last_day + 1, today)
-	day = last_day + 1
+def days_in_between(last_day):
+	today = datetime.now()
 	result = []
-	while day != today:
-		result.append(day)
-		day += 1
-		if day > 6:
-			day = 0
+	day_in_between = last_day + timedelta(days=1)
+	while day_in_between.date() < today.date():
+		result.append(day_in_between.weekday())
+		day_in_between = day_in_between + timedelta(days=1)
 	return result
 
 def send_catchup_reports(last_date, cookie, schedules, codsis):
 	last_day_of_week = last_date.weekday()
 	days_difference = (datetime.now() - last_date).days
 	today_day = datetime.now().weekday()
+	schedules = [{'start': parse_schedule_time(schedule['start_time']),
+			'id': schedule['id'],
+			'day_of_week': schedule['day_of_week']} for schedule in schedules]
 	print(days_difference)
 	if last_day_of_week == today_day and days_difference == 0: #both dates within the same day
 		today_schedules = list(filter(lambda schedule: schedule['day_of_week'] == today_day, schedules))
-		today_schedules = [{'start': parse_schedule_time(schedule['start_time']),
-			'end': parse_schedule_time(schedule['end_time']),
-			'id': schedule['id']} for schedule in today_schedules]
 		today_schedules = list(filter(lambda schedule: schedule['start'].time() < datetime.now().time() and 
 							schedule['start'].time() > last_date.time(), today_schedules))
 		report_skipped_schedules(today_schedules, cookie, codsis)
-	elif days_difference < 7: #less than a week difference (no repeated schedules)
+	else:
 		total_missed_schedules = list(filter(lambda schedule: schedule['day_of_week'] == last_day_of_week, schedules))
-		total_missed_schedules = [{'start': parse_schedule_time(schedule['start_time']),
-			'end': parse_schedule_time(schedule['end_time']),
-			'id': schedule['id']} for schedule in total_missed_schedules]
 		total_missed_schedules = list(filter(lambda schedule: schedule['start'].time() > last_date.time(), total_missed_schedules))
 
 		today_missed_schedules = list(filter(lambda schedule: schedule['day_of_week'] == today_day, schedules))
-		today_missed_schedules = [{'start': parse_schedule_time(schedule['start_time']),
-			'end': parse_schedule_time(schedule['end_time']),
-			'id': schedule['id']} for schedule in today_missed_schedules]
 		today_missed_schedules = list(filter(lambda schedule: schedule['start'].time() < datetime.now().time(), today_missed_schedules))
 		total_missed_schedules.extend(today_missed_schedules)
-		days_to_add = days_in_between(last_day_of_week, today_day)
+		
+		days_to_add = days_in_between(last_date)
 		for day in days_to_add:
+			print(day)
 			day_schedules = list(filter(lambda schedule: schedule['day_of_week'] == day, schedules))
 			total_missed_schedules.extend(day_schedules)		
 		report_skipped_schedules(total_missed_schedules, cookie, codsis)
-	#TODO differences bigger than a week (repeated schedules)
+
 
 def exit_application(icon, item):
 	icon.stop()
@@ -93,16 +86,16 @@ def set_schedules_for_today(all_schedules, cookie):
 		class_control.start()
 	print("schedules set for the day")
 
-if __name__ == "__main__":
+def main():
 	if not os.path.isdir(APP_FOLDER_PATH):
 			os.makedirs(APP_FOLDER_PATH)
 
 	if (os.path.exists(SESSION_FILE_PATH)):
-		file = open(SESSION_FILE_PATH, 'r')
-		data = file.read().split('\n')
+		session_file = open(SESSION_FILE_PATH, 'r')
+		data = session_file.read().split('\n')
 		codsis = data[0]
 		cookie = {'jwt': data[1]}
-		file.close()
+		session_file.close()
 	else :
 		guiUILogin = UILogin()
 		guiUILogin.mainloop()
@@ -122,3 +115,6 @@ if __name__ == "__main__":
 		difference = (datetime.combine(tomorrow, time.min) - datetime.now()).seconds + 60 #just in case addition
 		# print(difference)
 		thread_time.sleep(difference)
+
+if __name__ == "__main__":
+	main()
