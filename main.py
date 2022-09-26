@@ -35,7 +35,6 @@ def send_catchup_reports(last_date, cookie, schedules, codsis):
 	schedules = [{'start': parse_schedule_time(schedule['start_time']),
 			'id': schedule['id'],
 			'day_of_week': schedule['day_of_week']} for schedule in schedules]
-	print(days_difference)
 	if last_day_of_week == today_day and days_difference == 0: #both dates within the same day
 		today_schedules = list(filter(lambda schedule: schedule['day_of_week'] == today_day, schedules))
 		today_schedules = list(filter(lambda schedule: schedule['start'].time() < datetime.now().time() and 
@@ -51,7 +50,6 @@ def send_catchup_reports(last_date, cookie, schedules, codsis):
 		
 		days_to_add = days_in_between(last_date)
 		for day in days_to_add:
-			print(day)
 			day_schedules = list(filter(lambda schedule: schedule['day_of_week'] == day, schedules))
 			total_missed_schedules.extend(day_schedules)		
 		report_skipped_schedules(total_missed_schedules, cookie, codsis)
@@ -71,7 +69,7 @@ def start_tray_icon():
 def parse_schedule_time (schedule_time):
 	return datetime.strptime(schedule_time, RESPONSE_TIME_FORMAT)
 
-def set_schedules_for_today(all_schedules, cookie):
+def set_schedules_for_today(all_schedules, cookie, codsis):
 	today_day = datetime.today().weekday()
 	today_schedules = list(filter(lambda schedule: schedule['day_of_week'] == today_day, all_schedules))
 	today_schedules = [{'start': parse_schedule_time(schedule['start_time']),
@@ -110,10 +108,9 @@ def main():
 	start_tray_icon()
 
 	while True:
-		set_schedules_for_today(all_schedules, cookie)
+		set_schedules_for_today(all_schedules, cookie, codsis)
 		tomorrow = datetime.now() + timedelta(days=1)
 		difference = (datetime.combine(tomorrow, time.min) - datetime.now()).seconds + 60 #just in case addition
-		# print(difference)
 		thread_time.sleep(difference)
 
 if __name__ == "__main__":
