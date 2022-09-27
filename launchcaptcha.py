@@ -1,43 +1,42 @@
-import datetime 
-import time 
+import time
 import winsound 
-from threading import *
+import random
+from threading import Thread
 from uicaptcha import UICaptcha
 from datarequests import DataRequests
 
 class LaunchCaptcha:
 
-	def __init__(self, launchTime):
-		self.launchTime = launchTime
+	def __init__(self, wait_time, class_duration,codsis, schedule_id, cookie):
+		self.wait_time = wait_time
+		self.class_duration = class_duration
+		self.codsis = codsis
+		self.schedule_id = schedule_id
+		self.cookie = cookie
 
 	def start(self):
-		threadLaunch = Thread(target=self.alarm)
-		threadLaunch.start()
-	
-	def alarm(self): 
+		random_threshold = self.class_duration // 3
+		first_wait_time = self.wait_time + random.randint(1, random_threshold)
+		second_wait_time = self.wait_time + self.class_duration - random.randint(1, random_threshold)
+
+		first_control = Thread(target=lambda: self.alarm(first_wait_time))
+		second_control = Thread(target=lambda: self.alarm(second_wait_time))
+		first_control.start()
+		second_control.start()
 		
-		while True:
-			time.sleep(1)
-			
-			currentTime = datetime.datetime.now().strftime("%H:%M:%S")
-			print(currentTime, self.launchTime)
-			
-			if currentTime == self.launchTime:
-				print("Lanza el captcha")
-				winsound.PlaySound("sound.wav", winsound.SND_ASYNC)
-				
-				codeSis = "2222"
-				schudleId = 10
+	
+	def alarm(self, time_until_control):
 
-				uiCaptcha = UICaptcha()
-				uiCaptcha.mainloop()
-				data = codeSis + ";" + str(schudleId) + ";" + uiCaptcha.getResult()
-				print(data)
-				dataRequests = DataRequests()
-				dataRequests.requestsPost(dataRequests.createReport(data))
+		time.sleep(time_until_control) 
 
-				break
+		winsound.PlaySound("sound.wav", winsound.SND_ASYNC)
+		
+		codsis = self.codsis
+		schedule_id = self.schedule_id
 
-launchTime = "22:21:05"
-launchCaptcha = LaunchCaptcha(launchTime)
-launchCaptcha.start()
+		uiCaptcha = UICaptcha()
+		uiCaptcha.mainloop()
+		data = codsis + ";" + str(schedule_id) + ";" + uiCaptcha.getResult()
+
+		dataRequests = DataRequests()
+		dataRequests.requestsPost(dataRequests.createReport(data), self.cookie)

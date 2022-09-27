@@ -1,8 +1,17 @@
-from tkinter import *
+from tkinter import Tk, StringVar, Label, Entry, messagebox, Button, CENTER
+import os
+from tkinter import messagebox
+from datarequests import DataRequests
 
-import tkinter as tk
+USER_PATH = os.path.expanduser('~')
+APP_FOLDER_PATH	= USER_PATH + '/.control docente/'
+SESSION_FILE_PATH = APP_FOLDER_PATH + 'session'
+ALERT_TITLE = "Control docente"
+SUCCES_MESSAGE = "Inicio de sesion exitoso"
 
-class UILogin(tk.Tk):
+class UILogin(Tk):
+	logged_codsis = None
+	logged_cookie = None
 	
 	def __init__(self):
 		
@@ -43,14 +52,23 @@ class UILogin(tk.Tk):
 		buttonLogin = Button(self, width=19, pady=5, text="Login", font="Helvetica 10", command=self.verifyValues)
 		buttonLogin.pack()
 
+	def register_cookie(self, response):
+		session_file = open(SESSION_FILE_PATH, 'w+')
+		self.logged_cookie = response.cookies
+		cookie = self.logged_cookie.get('jwt')
+		session_file.write(f'{self.logged_codsis}\n{cookie}')
+		session_file.close()
+
 	def verifyValues(self):
 		if self.sisCode.get() == "" or self.password.get() == "":
 			self.message.set("Llene los campos vacíos")
 		else:
-			if self.sisCode.get() == "abc" and self.password.get() == "123":
-				self.message.set("Autenticación exitosa")
+			requests_service = DataRequests()
+			login_attempt = requests_service.requests_login_post(f'{{"codsis": "{self.sisCode.get()}", "password": "{self.password.get()}"}}')
+			if login_attempt.status_code == 200:
+				self.logged_codsis = self.sisCode.get()
+				self.register_cookie(login_attempt)
+				messagebox.showinfo(ALERT_TITLE, SUCCES_MESSAGE)
+				self.destroy()
 			else:
 				self.message.set("Código SIS y/o contraseña incorrectos")
-
-#guiUILogin = UILogin()
-#guiUILogin.mainloop()

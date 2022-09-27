@@ -1,11 +1,13 @@
+from tkinter import messagebox
 from turtle import width
-from captchamanagement import Captcha
-from tkinter import *
-from PIL import Image, ImageTk
+from captchamanagement import Captcha, CAPTCHA_PATH
+from tkinter import Tk, StringVar, Canvas, PhotoImage, CENTER, Entry, Label, Button
 
-import tkinter as tk
+ALERT_TITLE = 'Control'
+SUCCES_MESSAGE = "Confirmado"
+FAILED_MESSAGE = "Se excedio el maximo de intentos"
 
-class UICaptcha(tk.Tk):
+class UICaptcha(Tk):
 
 	def __init__(self):
 
@@ -21,6 +23,8 @@ class UICaptcha(tk.Tk):
 		self.iconbitmap("umss.ico")
 		self.resizable(0, 0)
 		self.eval('tk::PlaceWindow . center')
+		self.wm_attributes("-topmost", True)
+		self.protocol("WM_DELETE_WINDOW", lambda: None)
 
 		self.valueTextCaptcha = self.generateCaptcha()
 		self.numberAttemps = 0
@@ -34,7 +38,7 @@ class UICaptcha(tk.Tk):
 
 		self.canvas = Canvas(self, width=300, height=80)
 		self.canvas.pack()
-		self.imageCaptcha = PhotoImage(file="captcha.png")
+		self.imageCaptcha = PhotoImage(file=CAPTCHA_PATH)
 		self.canvas.create_image(self.WINDOW_WIDTH/2, 40, anchor=CENTER, image=self.imageCaptcha)
 
 		inputCaptcha = Entry(self, textvariable=self.textCaptcha, font="Helvetica 20", justify=CENTER)
@@ -47,7 +51,7 @@ class UICaptcha(tk.Tk):
 		buttonVerify = Button(self, width=19, pady=5, text="Verificar", font="Helvetica 10", command=self.verifyCaptcha)
 		buttonVerify.pack()
 
-		self.after(self.SECONDS, lambda:self.destroy())
+		self.after(self.SECONDS, self.destroy)
 
 	def generateCaptcha(self):
 		captcha = Captcha()
@@ -55,32 +59,22 @@ class UICaptcha(tk.Tk):
 		return str(captcha.getText())
 
 	def verifyCaptcha(self):
-		print("Texto captha {}" . format(self.valueTextCaptcha))
-
 		self.numberAttemps += 1
-		print("Intento número: {}" . format(self.numberAttemps))
-
 		if self.numberAttemps <= self.NUMBER_ATTEMPS:
 			if self.valueTextCaptcha == self.textCaptcha.get():
 				self.status = "completado"
 				self.message.set("Texto correcto {}" . format(self.textCaptcha.get()))
-				print("SON IGUALES")
+				messagebox.showinfo(ALERT_TITLE, SUCCES_MESSAGE)
 				self.destroy()
 				return None
 			
 			self.status = "fallido"
 			self.message.set("Texto incorrecto {}" . format(self.textCaptcha.get()))
-			print("SON DIFERENTES")
 
 			if self.numberAttemps == self.NUMBER_ATTEMPS:
+				messagebox.showinfo(ALERT_TITLE, FAILED_MESSAGE)
 				self.destroy()
 				return None
 	
 	def getResult(self):
 		return str(self.numberAttemps) + ";" + self.status
-
-'''
-guiCaptcha = UICaptcha()
-guiCaptcha.mainloop()
-print("\nRESULTADO: {}" . format(guiCaptcha.getResult()))
-'''
