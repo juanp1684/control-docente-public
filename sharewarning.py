@@ -25,6 +25,3 @@ class WarningAlert(Tk):
         self.after(DURATION, self.destroy)
         message_label = Label(self, text=MESSAGE, justify=CENTER, font = "Helvetica 14")
         message_label.pack()
-
-testUI = WarningAlert()
-testUI.mainloop()
