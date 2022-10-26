@@ -9,6 +9,7 @@ import os
 
 RESPONSE_TIME_FORMAT = "%H:%M:%S"
 RESPONSE_LAST_CONNECTION_FORMAT = "%Y-%m-%dT%H:%M:%S.%f%z"
+RESPONSE_LAST_CONNECTION_FORMAT_EDGE_CASE = "%Y-%m-%dT%H:%M:%S%z"
 USER_PATH = os.path.expanduser('~')
 APP_FOLDER_PATH	= USER_PATH + '/.control docente/'
 SESSION_FILE_PATH = APP_FOLDER_PATH + 'session'
@@ -102,8 +103,11 @@ def main():
 	request_manager = DataRequests()
 	response_data = request_manager.requestGet(sisCode=codsis, cookie=cookie)
 	all_schedules = response_data['schedules']
-	last_connection = datetime.strptime( response_data['last_connection'], RESPONSE_LAST_CONNECTION_FORMAT)
-	
+	try:
+		last_connection = datetime.strptime( response_data['last_connection'], RESPONSE_LAST_CONNECTION_FORMAT)
+	except ValueError:
+		last_connection = datetime.strptime( response_data['last_connection'], RESPONSE_LAST_CONNECTION_FORMAT_EDGE_CASE)
+		#edge case when a timestamp's miliseconds part is zero, it doesn't return a miliseconds section
 	send_catchup_reports(last_connection.replace(tzinfo=None), cookie, all_schedules, codsis)
 	start_tray_icon()
 
