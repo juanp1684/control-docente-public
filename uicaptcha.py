@@ -1,5 +1,4 @@
 from tkinter import messagebox
-from turtle import width
 from captchamanagement import Captcha, CAPTCHA_PATH
 from tkinter import Tk, StringVar, Canvas, PhotoImage, CENTER, Entry, Label, Button
 
@@ -16,13 +15,12 @@ class UICaptcha(Tk):
 		self.WINDOW_WIDTH = 320
 		self.WINDOW_HEIGTH = 210
 		self.NUMBER_ATTEMPS = 3
-		self.SECONDS = 30000
+		self.DURATION = 30000
 
 		self.title("Captcha")
 		self.geometry(str(self.WINDOW_WIDTH) + "x" + str(self.WINDOW_HEIGTH))
 		self.iconbitmap("umss.ico")
 		self.resizable(0, 0)
-		self.eval('tk::PlaceWindow . center')
 		self.wm_attributes("-topmost", True)
 		self.protocol("WM_DELETE_WINDOW", lambda: None)
 
@@ -51,7 +49,7 @@ class UICaptcha(Tk):
 		buttonVerify = Button(self, width=19, pady=5, text="Verificar", font="Helvetica 10", command=self.verifyCaptcha)
 		buttonVerify.pack()
 
-		self.after(self.SECONDS, self.destroy)
+		self.cancel_autoclose_id = self.after(self.DURATION, self.destroy)
 
 	def generateCaptcha(self):
 		captcha = Captcha()
@@ -70,6 +68,8 @@ class UICaptcha(Tk):
 			
 			self.status = "fallido"
 			self.message.set("Texto incorrecto {}" . format(self.textCaptcha.get()))
+			self.after_cancel(self.cancel_autoclose_id)
+			self.cancel_autoclose_id = self.after(self.DURATION, self.destroy)
 
 			if self.numberAttemps == self.NUMBER_ATTEMPS:
 				messagebox.showinfo(ALERT_TITLE, FAILED_MESSAGE)

@@ -2,6 +2,7 @@ import time
 import winsound 
 import random
 from threading import Thread
+from sharewarning import WarningAlert
 from uicaptcha import UICaptcha
 from datarequests import DataRequests
 
@@ -19,8 +20,10 @@ class LaunchCaptcha:
 		first_wait_time = self.wait_time + random.randint(1, random_threshold)
 		second_wait_time = self.wait_time + self.class_duration - random.randint(1, random_threshold)
 
+		share_warning = Thread(target=lambda: self.warning(self.wait_time))
 		first_control = Thread(target=lambda: self.alarm(first_wait_time))
 		second_control = Thread(target=lambda: self.alarm(second_wait_time))
+		share_warning.start()
 		first_control.start()
 		second_control.start()
 		
@@ -40,3 +43,12 @@ class LaunchCaptcha:
 
 		dataRequests = DataRequests()
 		dataRequests.requestsPost(dataRequests.createReport(data), self.cookie)
+
+	def warning(self, time_until_warning):
+
+		time.sleep(time_until_warning)
+
+		winsound.PlaySound("sound.wav", winsound.SND_ASYNC)
+		
+		warning = WarningAlert()
+		warning.mainloop()
